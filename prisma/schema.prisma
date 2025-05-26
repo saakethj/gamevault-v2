@@ -1,0 +1,60 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id           Int      @id @default(autoincrement())
+  username     String
+  joinedDate   DateTime
+  favoriteGenre String?
+  avatarPath   String?
+  games        GamerLibrary[]
+  activities   ActivityLog[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Game {
+  id            Int      @id @default(autoincrement())
+  title         String
+  releaseYear   Int?
+  developer     String?
+  publisher     String?
+  genre         String?
+  coverImage    String?
+  library       GamerLibrary[]
+  activities    ActivityLog[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model GamerLibrary {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  gameId      Int
+  statusId    Int
+  platformId  Int
+  progress    Int      @default(0)
+  isFavorite  Boolean  @default(false)
+  hoursPlayed Float    @default(0)
+  rating      Float?
+  lastPlayed  DateTime?
+  notes       String?
+  addedDate   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  game        Game     @relation(fields: [gameId], references: [id])
+  status      GameStatus @relation(fields: [statusId], references: [id])
+  platform    Platform @relation(fields: [platformId], references: [id])
+  
+  @@unique([profileId, gameId, platformId])
+}
+
+// ... other models (GameStatus, Platform, ActivityLog)
