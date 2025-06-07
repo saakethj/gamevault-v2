@@ -1,4 +1,6 @@
-// prisma/schema.prisma
+// Prisma Schema for GameVault - Component 2
+// Adding core table models with relationships
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,53 +10,101 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Core Models
 model Profile {
-  id           Int      @id @default(autoincrement())
-  username     String
-  joinedDate   DateTime
-  favoriteGenre String?
-  avatarPath   String?
-  games        GamerLibrary[]
-  activities   ActivityLog[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  ProfileID     Int      @id @default(autoincrement())
+  Username      String   @db.NVarChar(50)
+  JoinedDate    DateTime @db.Date
+  FavoriteGenre String?  @db.NVarChar(50)
+  AvatarPath    String?  @db.NVarChar(255)
+  CreatedAt     DateTime @default(now())
+  UpdatedAt     DateTime @default(now())
+
+  // Relations
+  gamerLibrary GamerLibrary[]
+  activityLogs ActivityLog[]
+
+  @@map("Profile")
 }
 
 model Game {
-  id            Int      @id @default(autoincrement())
-  title         String
-  releaseYear   Int?
-  developer     String?
-  publisher     String?
-  genre         String?
-  coverImage    String?
-  library       GamerLibrary[]
-  activities    ActivityLog[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  GameID         Int      @id @default(autoincrement())
+  Title          String   @db.NVarChar(100)
+  ReleaseYear    Int?
+  Developer      String?  @db.NVarChar(100)
+  Publisher      String?  @db.NVarChar(100)
+  GenreName      String?  @db.NVarChar(50)
+  CoverImagePath String?  @db.NVarChar(255)
+  CreatedAt      DateTime @default(now())
+  UpdatedAt      DateTime @default(now())
+
+  // Relations
+  gamerLibrary GamerLibrary[]
+  activityLogs ActivityLog[]
+
+  @@map("Game")
 }
 
+model GameStatus {
+  StatusID          Int     @id @default(autoincrement())
+  StatusName        String  @db.NVarChar(50)
+  StatusDescription String? @db.NVarChar(255)
+
+  // Relations
+  gamerLibrary GamerLibrary[]
+
+  @@map("GameStatus")
+}
+
+model Platform {
+  PlatformID   Int    @id @default(autoincrement())
+  PlatformName String @db.NVarChar(50)
+
+  // Relations
+  gamerLibrary GamerLibrary[]
+
+  @@map("Platform")
+}
+
+// Main Library Table - The heart of your gaming data
 model GamerLibrary {
-  id          Int      @id @default(autoincrement())
-  profileId   Int
-  gameId      Int
-  statusId    Int
-  platformId  Int
-  progress    Int      @default(0)
-  isFavorite  Boolean  @default(false)
-  hoursPlayed Float    @default(0)
-  rating      Float?
-  lastPlayed  DateTime?
-  notes       String?
-  addedDate   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  profile     Profile  @relation(fields: [profileId], references: [id])
-  game        Game     @relation(fields: [gameId], references: [id])
-  status      GameStatus @relation(fields: [statusId], references: [id])
-  platform    Platform @relation(fields: [platformId], references: [id])
-  
-  @@unique([profileId, gameId, platformId])
+  LibraryID   Int      @id @default(autoincrement())
+  ProfileID   Int?
+  GameID      Int?
+  StatusID    Int?
+  PlatformID  Int?
+  Progress    Int      @default(0)
+  IsFavorite  Boolean  @default(false)
+  HoursPlayed Decimal  @default(0) @db.Decimal(10, 2)
+  LastPlayed  DateTime?
+  Notes       String?  @db.NText
+  AddedDate   DateTime @default(now())
+  UpdatedAt   DateTime @default(now())
+  Rating      Float?
+
+  // Relations
+  profile  Profile?    @relation(fields: [ProfileID], references: [ProfileID])
+  game     Game?       @relation(fields: [GameID], references: [GameID])
+  status   GameStatus? @relation(fields: [StatusID], references: [StatusID])
+  platform Platform?   @relation(fields: [PlatformID], references: [PlatformID])
+
+  // Unique constraint
+  @@unique([ProfileID, GameID, PlatformID], name: "UQ_ProfileGame")
+  @@map("GamerLibrary")
 }
 
-// ... other models (GameStatus, Platform, ActivityLog)
+// Activity tracking
+model ActivityLog {
+  LogID        Int      @id @default(autoincrement())
+  ProfileID    Int?
+  GameID       Int?
+  ActivityType String   @db.NVarChar(50)
+  ActivityDate DateTime @default(now())
+  Details      String?  @db.NText
+
+  // Relations
+  profile Profile? @relation(fields: [ProfileID], references: [ProfileID])
+  game    Game?    @relation(fields: [GameID], references: [GameID])
+
+  @@map("ActivityLog")
+}
