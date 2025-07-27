@@ -1,11 +1,9 @@
-import Layout from './components/Layout';
-import Library from './pages/Library';
+
 
 function App() {
-  return (
-    <Layout>
-      <Library />
-    </Layout>
+return (
+    <div className="min-h-screen w-screen overflow-x-hidden bg-black text-white">
+    </div>
   );
 }
 
