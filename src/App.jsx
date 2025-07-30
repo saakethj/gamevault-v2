@@ -1,16 +1,13 @@
-import { auth, db } from './firebase'
+import { auth, db } from './firebase';
+import Login from './pages/auth/Login';
+
 
 function App() {
   console.log('Firebase Auth:', auth)
   console.log('Firebase DB:', db)
   
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-blue-600">GameVault</h1>
-      </div>
-    </div>
-  )
+  return <Login />;
+  
 }
 
 export default App
